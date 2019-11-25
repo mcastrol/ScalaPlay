@@ -2,35 +2,119 @@
 case class ShoeSize(size_numeric: String, scale: String, retailed_size_numeric: String, retailed_scale: String,
                     gtin: String, sku: String, shoe_length: String, shoe_height: String, heel_height: String,
                     platform_height: String, stock_level: String)
+//case class Shoe(
+//                 title: String,
+//                 description: String,
+//                 brand: String,
+//                 shoe_category: String,
+//                 color: String,
+//                 article_number: String,
+//                 material: String,
+//                 barcode: String,
+//                 sizes: Seq[ShoeSize]
+//               ) {
+//}
+
 case class Shoe(
                  title: String,
                  description: String,
                  brand: String,
-                 shoe_category: String,
-                 color: String,
-                 article_number: String,
-                 material: String,
-                 barcode: String,
                  sizes: Seq[ShoeSize]
                ) {
-
 }
 
-//val duke_transfo2 =
-//  (str: String) => {"aaaa"
-//  }
 
-
-val duke_transfo =
+val inter_transfo =
   (str: String) => {val pattern = """\d+(?:\.\d+)?""".r; pattern.findFirstIn(str).getOrElse(str)
   }
+
+val inter_removeKidsShoes =
+  (shoe: Shoe) => {
+    val newSizes = shoe.sizes.filter(
+      size => (size.size_numeric.toDouble >= 34.0)
+    )
+    if(newSizes.isEmpty) {
+      None
+    }
+    else {
+      Some(shoe.copy(sizes = newSizes))
+    }
+  }
+
+val remove_flip_flop =
+  (shoe: Shoe) => {
+    val pattern = """Flip Flop""".r
+    val modelMatches = pattern.findFirstMatchIn(shoe.title)
+    modelMatches match {
+      case Some(s) =>
+        None
+      case None =>
+        Some(shoe)
+    }
+  }
+
+val size_1 = "38 ½ Mondo"
+val size_2 = "39 ½ Mondo"
+val size1_transfo = inter_transfo(size_1)
+val size2_transfo = inter_transfo(size_2)
+println("size1_transfo: "+size1_transfo)
+println("size2_transfo: "+size2_transfo)
+
+val ss1 = ShoeSize(size1_transfo,"EU","","","","","","","","","")
+val ss2 = ShoeSize(size2_transfo,"EU","","","","","","","","","")
+
+val sizesSeq = Seq(ss1,ss2)
+
+val shoe1 = Shoe("FIREFLY Herren Flip Flops Zehensandale Madera M","TECNICA Skisschuhe MACH1 MV 130","TECNICA", sizesSeq)
+val shoe1_transfo  = inter_removeKidsShoes(shoe1)
+println(shoe1_transfo)
+
+val shoe1_transfo2  = remove_flip_flop(shoe1)
+
+//val shoe1 = Shoe("Longo Komfort","zapatilla adidas","", "<spec> <name>Stil</name><values> <string>Spor terlik</string></values></spec><spec> <name>Renk</name><values> <string>Somon</string><string>Mint</string><string>Ekru</string><string>Pembe</string></values></spec><spec> <name>Numara</name><values> <string>39 - 40</string><string>35 - 36</string><string>37 - 38</string></values></spec><spec> <name>Durum</name><values> <string>Yeni, Kutusunda</string></values></spec><spec> <name>Marka</name><values> <string>A' La</string></values></spec>",sizes1)
+//println(shoe1)
+
+
+//val shoe1 = Shoe("Spangenschuhe Hestia 37","","Brako", "Schuhe und Strümpfe > Schuhe und Stiefel > Spangenschuhe", "Grau","2295266_37","","",sizesSeq)
+//
+//val newShoe1=CleanSizes(shoe1)
+////val newShoe1=RuleToTestfake(shoe1)
+
+
+
+// intersport //
+//val removeAllKidsShoes =
+//(shoe: Shoe) => {
+//  if (size.size_numeric.toDouble < 34)
+//    None
+//  else
+//    Some(shoe)
+//}
+//
+//val 	removeAllrollerskates =
+//  (shoe: Shoe) => {
+//    val size_numeric = size.size_numeric
+//    if(size_numeric.indexOf("Mondo") != -1)
+//      None
+//    else
+//      Some(shoe)
+//  }
+//
+//val 	removeAllSlippers =
+//  (shoe: Shoe) => {
+//    val model = shoe.model
+//    if(model.indexOf("Flip Flops ") != -1)
+//      None
+//    else
+//      Some(shoe)
+//  }
+//
 
 //val transfo =
 // (str: String) =>  { val regex = "\d+(?:\.\d+)?".r; regex.findFirstMatchIn(str) match { case Some(s) => { s } case None => { str }}
 
 //val transfo2 =
 //(str: String) => {val pattern = """\d+(?:\.\d+)?""".r; pattern.findFirstIn(str).getOrElse("invalid_size")}
-
 
 //val CleanSizes =
 //  (shoe: Shoe) => {
@@ -45,30 +129,26 @@ val RuleToTestfake =
   }
 
 
-val CleanupModel =
-    (shoe: Shoe) => {
-    Some(shoe.copy(
-      title = shoe.title
-        .replace(shoe.brand, "")
-        .replace(shoe.shoe_category, "")
-        .replace(shoe.color, "")
-        .replace(shoe.material, "")
-        .replaceAll("""\bGröße\s.+aus\b""", "")
-        .replaceAll("""\b(Damen|Unisex)""", "")
-        .replace("Größe","")
-        .trim()
-    ))
-  }
+//val CleanupModel =
+//    (shoe: Shoe) => {
+//    Some(shoe.copy(
+//      title = shoe.title
+//        .replace(shoe.brand, "")
+//        .replace(shoe.shoe_category, "")
+//        .replace(shoe.color, "")
+//        .replace(shoe.material, "")
+//        .replaceAll("""\bGröße\s.+aus\b""", "")
+//        .replaceAll("""\b(Damen|Unisex)""", "")
+//        .replace("Größe","")
+//        .trim()
+//    ))
+//  }
 
 
-
-
-val TransformationFunctionForArticleNumber =
-  (shoe: Shoe) => {
-    Some(shoe.copy(article_number=shoe.article_number.substring(0, shoe.article_number.indexOf('_'))))
-  }
-
-
+//val TransformationFunctionForArticleNumber =
+//  (shoe: Shoe) => {
+//    Some(shoe.copy(article_number=shoe.article_number.substring(0, shoe.article_number.indexOf('_'))))
+//  }
 
 val anwr =
 (shoe: Shoe) => {
@@ -101,11 +181,6 @@ val testsize =
 //
 //val ss1transfo = transfo(ss1)
 
-val ssd = "EU 36 / UK 3 / US 6"
-
-val ssdtransfo = duke_transfo(ssd)
-
-println(ssdtransfo)
 
 //val shoe1 = Shoe("Longo Komfort","zapatilla adidas","", "<spec> <name>Stil</name><values> <string>Spor terlik</string></values></spec><spec> <name>Renk</name><values> <string>Somon</string><string>Mint</string><string>Ekru</string><string>Pembe</string></values></spec><spec> <name>Numara</name><values> <string>39 - 40</string><string>35 - 36</string><string>37 - 38</string></values></spec><spec> <name>Durum</name><values> <string>Yeni, Kutusunda</string></values></spec><spec> <name>Marka</name><values> <string>A' La</string></values></spec>",sizes1)
 //println(shoe1)

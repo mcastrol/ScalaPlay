@@ -1,8 +1,8 @@
-import java.sql.{Connection, DriverManager}
+import java.io.ByteArrayInputStream
+import java.sql.{Connection, DriverManager, PreparedStatement}
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.Column
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.functions._
@@ -23,24 +23,20 @@ object PurchasesETL {
     import session.implicits._
 
 
-
-    val dataFrameReader = session.read
-
-
-
-    val purchases_input_file = dataFrameReader
-      .option("header", "true")
-      .option("inferSchema", value = true)
-      .csv("in/purchases_input_file.csv")
-
-
-    System.out.println("=== Print out schema ===")
-    purchases_input_file.printSchema()
-    purchases_input_file.show()
-
-//    DBs.setupAll()
-
+//    val dataFrameReader = session.read
+//
+//    val purchases_input_file = dataFrameReader
+//      .option("header", "true")
+//      .option("inferSchema", value = true)
+//      .csv("in/purchases_input_file.csv")
+//
+//    System.out.println("=== Print out schema ===")
+//    purchases_input_file.printSchema()
+//    purchases_input_file.show()
+    //scalikejdbc: configure build.sbt & resources/application.conf
     DBsWithEnv("development").setupAll()
+
+    //reading title and building an array of colNames
     var col_names = new ListBuffer[String]()
     DB readOnly { implicit session =>
       sql"""select title from import_configurations ic join import_file_column_options ifco on ifco.import_configuration_id=ic.id
@@ -54,11 +50,15 @@ object PurchasesETL {
     col_names.foreach(println)
 
     val id = 215496
+    //val ids = Seq(71,72,73,74,75,76,77,78,79,80)
 
     // simple example
+    //execute a select of
     val model: Option[String] = DB readOnly { implicit session =>
-      sql"SELECT model from shop_portfolio_shoes where id = ${id}".map(rs => rs.string("model")).single.apply()
+      sql"SELECT model from shop_portfolio_shoes where id=${id}".map(rs => rs.string("model")).single.apply()
     }
+
+    println("printing several models")
 
     println(model)
 
@@ -78,17 +78,19 @@ object PurchasesETL {
 
     println(shoe)
 
-//    case class Shoe(id: Int, model: String, material: String)
-    // QueryDSL
-//    object Shoe extends SQLSyntaxSupport[Shoe] {
-//        def apply(e: ResultName[Shoe])(rs: WrappedResultSet): Shoe = new Shoe(id=rs.get(e.id), model = rs.get(e.model), material = rs.get(e.material))
+//    case class Brands(id: Int, name: String, created_at: String, updated_at: String, size_chart_policy_id: Int, main_image: String, url: String)
+//    /// QueryDSL
+//    object Brands extends SQLSyntaxSupport[Brands] {
+//        def apply(b: ResultName[Brands])(rs: WrappedResultSet): Brands= new Brands(id=rs.get(b.id), name = rs.get(b.name),
+//          created_at = rs.get(b.created_at), updated_at=rs.get(b.updated_at), size_chart_policy_id=rs.get(b.size_chart_policy_id),
+//          main_image=rs.get(b.main_image),url= rs.get(b.url))
 //    }
-//    val e = Shoe.syntax("e")
-//    val shoe2: Option[Shoe] = DB readOnly { implicit session =>
-//      withSQL { select.from(Shoe as e).where.eq(e.id, id) }.map(Shoe(e.resultName)).single.apply()
+//    val b = Brands.syntax("b")
+//    val brand: Option[Brands] = DB readOnly { implicit session =>
+//      withSQL { select.from(Brands as b).where.eq(b.id, id) }.map(Brands(b.resultName)).single.apply()
 //    }
 //
-//    println(shoe2)
+//    println(brand)
 
 
     //first result
@@ -109,24 +111,35 @@ object PurchasesETL {
 
     val list_shoes: List[Shoe] = DB readOnly { implicit session =>
       sql"SELECT id,model,material from shop_portfolio_shoes limit 10".map(rs => Shoe(rs.int("id"), rs.string("model"), rs.string("material"))).list.apply()
-//    val m = Shoe.syntax("s")
-//    val name: Option[String] = DB readOnly { implicit session =>
-//      withSQL { select(e.result.name).from(Emp as e) }.map(_.string(e.name)).first.apply()
     }
-
     println("list varios results:")
 
     println(list_shoes)
 
+
+    //indicating fetch size
+    val list_shoes_fetch: List[Shoe] = DB readOnly { implicit session =>
+      sql"SELECT id,model,material from shop_portfolio_shoes limit 1000"
+        .fetchSize(100)
+        .map(rs => Shoe(rs.int("id"), rs.string("model"), rs.string("material"))).list.apply()
+    }
+    println("list varios results (using fetch):")
+
+    println(list_shoes_fetch)
+
+    ).execute.apply()
+
+    val bytes = scala.Array[Byte](1, 2, 3, 4, 5, 6, 7)
+    val in = new ByteArrayInputStream(bytes)
+    val bytesBinder = ParameterBinder(
+      value = in,
+      binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length)
+    )
+
+    sql"insert into blob_example (data) values (${bytesBinder})").update.apply()
+
+
     DBs.closeAll()
-
-    //get configured mapped columns from configuration
-//    var col_names = getMappingColumns(session, 802)
-//
-//    var purchases_input_file_2 = purchases_input_file.toDF(col_names: _*).withColumn("size_scale",lit("EU")).show
-//
-
-
 
   }
 
