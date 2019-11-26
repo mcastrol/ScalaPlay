@@ -41,7 +41,7 @@ val t1tr2 = BRA_size_scale(t1tr.get)
 val t1tr3 =  exclude_cancelled_rows(t1tr2.get)
 println(t1tr3)
 
-println(t1tr)
+println(t1tr3)
 
 /* test 2 BR scale  ""*/
 val t2 = Raw_Import_Purchases2("ext-id", "email","10","BR",1,"10-15-2019","modelito")
@@ -51,7 +51,7 @@ val t2tr3 =  exclude_cancelled_rows(t2tr2.get)
 println(t2tr3)
 
 /* test 3 exclude  ""*/
-val t3 = Raw_Import_Purchases2("ext-id", "email","10","BR",1,"10-15-2019","Cancel")
+val t3 = Raw_Import_Purchases2("ext-id", "email","10","SS BR",1,"10-15-2019","Cancel")
 val t3tr =date_format(t3)
 val t3tr2 = BRA_size_scale(t3tr.get)
 val t3tr3 =  exclude_cancelled_rows(t3tr2.get)

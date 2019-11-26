@@ -3,8 +3,7 @@ case class Raw_Import_Purchases (
                                   email: String,
                                   size: String,
                                   size_scale:String,
-                                  quantity: Int,
-                                  order_time: String
+                                  quantity: Int
                                 )
 
 

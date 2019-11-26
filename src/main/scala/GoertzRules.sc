@@ -8,8 +8,7 @@ case class Raw_Import_Purchases (
                                   email: String,
                                   size: String,
                                   size_scale:String,
-                                  quantity: Int,
-                                  order_time: String
+                                  quantity: Int
                                 )
 
 val exclude__size_scale_uk =
@@ -30,7 +29,9 @@ println(ripT1Transfo)
 
 val exclude_size_less_33 =
   (rip: Raw_Import_Purchases) => {
-    if(rip.size.toDouble < 33.0)  None
+    val pattern = """\d+(?:\.\d+)?""".r;
+    val newSize= pattern.findFirstIn(rip.size).getOrElse("0")
+    if(newSize.toDouble < 33.0)  None
     else Some(rip)
   }
 
@@ -38,6 +39,10 @@ val ripTest = Raw_Import_Purchases("a2", "","28","UK",1)
 val ripTestTransfo = exclude_size_less_33(ripTest)
 println(ripTestTransfo)
 
-val ripTest2 = Raw_Import_Purchases("a2", "","30","UK",1)
+val ripTest2 = Raw_Import_Purchases("a2", "","35","UK",1)
 val ripTestTransfo2 = exclude_size_less_33(ripTest2)
 println(ripTestTransfo2)
+
+val rT3 = Raw_Import_Purchases("a2", "","M","UK",1)
+val ripT3Tr1 = exclude_size_less_33(rT3)
+println(ripT3Tr1)
