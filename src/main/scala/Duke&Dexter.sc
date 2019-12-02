@@ -4,7 +4,8 @@ case class Raw_Import_Purchases (
                                   size: String,
                                   size_scale:String,
                                   quantity: Int,
-                                  order_time: String
+                                  order_time: String,
+                                  model: String
                                 )
 
 /* Duke and Dexter *
@@ -28,16 +29,16 @@ val CleanSizes =
 
 /* CASES "UK 9" - UK - ""*/
 //t1: no number
-val t1 = Raw_Import_Purchases("a2", "","","UK",1)
+val t1 = Raw_Import_Purchases("a2", "","","UK",1,"")
 val t1tr = CleanSizes(t1)
 println(t1tr)
 //t2: no number
-val t2 = Raw_Import_Purchases("a2", "","","UK 9",1)
+val t2 = Raw_Import_Purchases("a2", "","","UK 9",1,"")
 val t2tr = CleanSizes(t2)
 println(t2tr)
 
 //t3: no value
-val t3 = Raw_Import_Purchases("a2", "","","",1)
+val t3 = Raw_Import_Purchases("a2", "","","",1,"")
 val t3tr = CleanSizes(t3)
 println(t3tr)
 

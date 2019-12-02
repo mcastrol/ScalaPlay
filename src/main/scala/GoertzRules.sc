@@ -3,13 +3,8 @@ exclude all size_scale=UK
 exclude all size<33
  */
 
-case class Raw_Import_Purchases (
-                                  external_id: String,
-                                  email: String,
-                                  size: String,
-                                  size_scale:String,
-                                  quantity: Int
-                                )
+
+
 
 val exclude__size_scale_uk =
   (rip: Raw_Import_Purchases) => {
@@ -35,14 +30,14 @@ val exclude_size_less_33 =
     else Some(rip)
   }
 
-val ripTest = Raw_Import_Purchases("a2", "","28","UK",1)
+val ripTest = Raw_Import_Purchases("a2", "","28","UK",1,"","")
 val ripTestTransfo = exclude_size_less_33(ripTest)
 println(ripTestTransfo)
 
-val ripTest2 = Raw_Import_Purchases("a2", "","35","UK",1)
+val ripTest2 = Raw_Import_Purchases("a2", "","35","UK",1,"","")
 val ripTestTransfo2 = exclude_size_less_33(ripTest2)
 println(ripTestTransfo2)
 
-val rT3 = Raw_Import_Purchases("a2", "","M","UK",1)
+val rT3 = Raw_Import_Purchases("a2", "","M","UK",1,"","")
 val ripT3Tr1 = exclude_size_less_33(rT3)
 println(ripT3Tr1)
