@@ -1,13 +1,19 @@
-case class Raw_Import_Purchases (
-                                  external_id: String,
-                                  email: String,
-                                  size: String,
-                                  size_scale:String,
-                                  quantity: Int,
-                                  order_time: String,
-                                  model: String
-                                )
-
+case class RawImportPurchase(
+                              external_id: String,
+                              //                              brand: String,
+                              model: String,
+                              size_scale: String,
+                              //                              size_width: String,
+                              size: String,
+                              order_number: String,
+                              order_time: String,
+                              email: String,
+                              //,
+                              //                              ip: String,
+                              quantity: Int
+                              //                              price: Double,
+                              //                              currency: String
+                            ){}
 /*
 ojo ver tratamiento de size no numéricos.
 remove leading 0
@@ -25,7 +31,7 @@ replace # by .33
 //replace "#" in size by .33
 //exclude rows with quantity <1
 val clean_article_id_email_quantity =
-  (rip: Raw_Import_Purchases) => {
+  (rip: RawImportPurchase) => {
     val external_id_1=rip.external_id.replaceFirst("^0+", "");
     val regexp = "-\\d+".r
     val external_id_2=regexp.replaceFirstIn(external_id_1,"")
@@ -43,7 +49,7 @@ val clean_article_id_email_quantity =
 
 //set size_scale EU for not size_scale and for sizes between 30 & 60
 val set_size_scale_eu =
-  (rip: Raw_Import_Purchases) => {
+  (rip: RawImportPurchase) => {
     val pattern = """\d+(?:\.\d+)?""".r;
     val size_num= pattern.findFirstIn(rip.size).getOrElse("0").toDouble
     val size_scale_1=if(rip.size_scale.isEmpty & size_num>=30 & size_num<=60) "EU" else rip.size_scale
@@ -58,7 +64,7 @@ val set_size_scale_eu =
 */
 
 //test 1 article-id and email
-val t1 = Raw_Import_Purchases("00001025305-5637655019", "000020181729","40","",1,"2019-10-15","")
+val t1 = RawImportPurchase("00001025305-5637655019", "model1","","40","onumber","2019-10-15","000020181729",1)
 val t1tr =clean_article_id_email_quantity(t1)
 println(t1tr)
 assert(t1tr.get.external_id=="1025305","clean article id: leading 0 and after - OK")
@@ -70,13 +76,13 @@ assert(t1tr2.get.size_scale=="EU","put size scale in EU is OK")
 println(t1tr2)
 
 //test 2: exclude rows with quantity <1
-val t2 = Raw_Import_Purchases("00001025305-5637655019", "000020181729","10#","",0,"10-15-2019","")
+val t2 = RawImportPurchase("00001025305-5637655019", "model2","","10#","onu","10-15-2019","000020181729",0)
 val t2tr =clean_article_id_email_quantity(t2)
 assert(t2tr.getOrElse("None")=="None","exclude rows with quantity = 0 ok")
 println(t2tr)
 
 //test 3 transform # in size for .33
-val t3 = Raw_Import_Purchases("00001025305-563019", "000020181729","35#","",10,"10-15-2019","")
+val t3 = RawImportPurchase("00001025305-563019", "model","","35#","on","10-15-2019","000020181729",10)
 val t3tr =clean_article_id_email_quantity(t3)
 val t3tr2 =set_size_scale_eu(t3tr.get)
 println(t3tr2)
